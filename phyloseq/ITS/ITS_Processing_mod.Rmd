@@ -1,0 +1,44 @@
+---
+title: "ITS_processing"
+author: "Erik Killian"
+date: "2025-06-16"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+Tempest code FilterandTrim.R created seqtabs for each location-year, merged them, then removed chimeras and assigned taxonomy.
+
+
+```{r phyloseq object Quality > 20 and Trunc to 200bp}
+
+library(phyloseq)
+seqtab = readRDS("~/phyloseq/ITS/seqtab.merged.NoC.RDS")
+rownames(seqtab) <- gsub("hi", "HI", rownames(seqtab))
+
+taxtab = readRDS("~/phyloseq/ITS/taxTab.RDS")
+fieldData = readRDS("~/phyloseq/agData/fieldData_Combined.RDS")
+
+
+# Merge Phyloseq
+ps.its = phyloseq(otu_table(seqtab,taxa_are_rows = F),tax_table(taxtab),sample_data(fieldData))
+
+# Add ASV short names
+dna <- Biostrings::DNAStringSet(taxa_names(ps.its))
+names(dna) <- taxa_names(ps.its)
+ps.its <- merge_phyloseq(ps.its, dna)
+taxa_names(ps.its) <- paste0("ASV", seq(ntaxa(ps.its)))
+
+
+ps.its # 19,229 taxa
+out.new = subset_taxa(ps.its, Kingdom == "k__Fungi" & !is.na(Kingdom))
+summary(refseq(out.new)@ranges@width) # All 200bp 
+m_fungi = as.data.frame(tax_table(out.new))
+nrow(m_fungi) # 17,008 Fungi ASVs
+nrow(m_fungi[!is.na(m_fungi$Genus),]) # 13,833 fungi ASVs @ Genus
+length(unique(m_fungi$Genus)) # 1,511 unique fungi genera
+
+ps.its
+saveRDS(ps.its, "~/phyloseq/ITS/ps.q20.trunc200.RDS")
+```
+ 
