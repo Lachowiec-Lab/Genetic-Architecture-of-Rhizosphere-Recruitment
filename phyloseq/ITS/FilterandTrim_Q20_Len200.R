@@ -9,13 +9,12 @@ library(plyr)
 library(dplyr)
 library(vegan)
 
-setwd("~/Desktop/Phyloseq2.0/ITS/Quality_20_Len200")
 
 
 
 
-doitagain = function(miseq_path = "/home/j22f487/Desktop/ITS/Reads/2021/BZ/cutadapt", 
-                        filt_path = "/home/j22f487/Desktop/Phyloseq2.0/ITS/Quality_20_Len200",ErrorRate) {
+doitagain = function(miseq_path = "", 
+                        filt_path = "",ErrorRate) {
   
   fnFs <- sort(list.files(miseq_path, pattern="_R1_001.fastq"))
 
