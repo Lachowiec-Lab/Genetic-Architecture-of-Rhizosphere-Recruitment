@@ -1,0 +1,289 @@
+---
+title: "Processing with 16S Hawaii"
+author: "Erik Killian"
+date: "2025-08-05"
+output: html_document
+---
+---
+title: "phyloseq_processing"
+author: "Erik Killian"
+date: "2025-06-10"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+This follows the same protocol as max_EE_2, except now I've fixed the Hawaii data that was previously a copy of the ITS data instead of 16S data.
+
+
+# Step 1: Load Phyloseq Pieces
+```{r LOAD HERE}
+library(dada2)
+library(phyloseq)
+library(readxl)
+library(dplyr)
+library(ggplot2)
+
+getwd()
+# Loads merged field data - created in the chunk below.
+fieldData = readRDS("C:/Users/killi/OneDrive - Montana State University/PostDoc/Microbiome_bacteria/fieldData_Combined.RDS")
+
+# Loaded from tempest output 
+## 2021.R and 2022.R create seqtabs 
+## merging.R merge seqtabs, remove chimeras, and creates taxtab
+## Phylogenetic_Tree.R uses merging.R output "seqtab_NoC" to create phylo tree
+
+## seqtab is the merged seqtabs from each location-year, merged then chimeras removed.
+## taxtab is the taxonomy table, made from seqtab to classify taxonomy.
+
+seqtab = readRDS("Phyloseq2.0_Tempest/16S_maxEE_2_HI16S/seqtab.merged.NoC.RDS")
+taxtab = readRDS("Phyloseq2.0_Tempest/16S_maxEE_2_HI16S/taxTab.RDS")
+
+```
+
+# Step 2: Merge Phyloseq into One
+
+```{r Create phyloseq object}
+ps = phyloseq(otu_table(seqtab,taxa_are_rows = FALSE),
+              tax_table(taxtab),
+              sample_data(fieldData))
+
+
+# Add ASV short names
+dna <- Biostrings::DNAStringSet(taxa_names(ps))
+names(dna) <- taxa_names(ps)
+ps <- merge_phyloseq(ps, dna)
+taxa_names(ps) <- paste0("ASV", seq(ntaxa(ps)))
+ps.all = ps
+ps = subset_taxa(ps, Kingdom == "Bacteria") # Removes only 403 taxa 
+
+saveRDS(ps,"Phyloseq2.0_Tempest/16S_maxEE_2_HI16S/ps.RDS")
+
+table(taxtab[,"Kingdom"])
+table(tax_table(ps)[,"Kingdom"])
+table(sample_data(ps)[,"Location"])
+
+```
+
+# Step 3: Add Environmental Data
+```{r Add Env data}
+# Add soil texture, precip, previous crop, OM
+#readRDS("ps.RDS")
+psField = ps
+# Load environmental datasets
+bz.soil =readxl::read_xlsx("soilsummary.xlsx",sheet = 3)
+bz.soil = bz.soil[!is.na(bz.soil$`Kind Of Sample`),]
+colnames(bz.soil)[colnames(bz.soil) == "Sample ID"] = "Block"
+
+bz22.soil = readxl::read_xlsx("soilsummary.xlsx", sheet = 4)
+bz22.soil = bz22.soil[!is.na(bz22.soil$`Kind Of Sample`),]
+colnames(bz22.soil)[colnames(bz22.soil) == "Sample ID"] = "Block"
+
+mo21.soil = readxl::read_xlsx("soilsummary.xlsx", sheet = 5)
+mo21.soil = mo21.soil[!is.na(mo21.soil$City),]
+colnames(mo21.soil)[colnames(mo21.soil) == "Sample ID"] = "Block"
+mo21.soil$Block = 1:12
+
+mo22.soil = readxl::read_xlsx("soilsummary.xlsx", sheet = 6)
+mo22.soil = mo22.soil[!is.na(mo22.soil$`Kind Of Sample`),]
+colnames(mo22.soil)[colnames(mo22.soil) == "Sample ID"] = "Block"
+mo22.soil$Block = 1:12
+
+sd21.soil = readxl::read_xlsx("soilsummary.xlsx", sheet = 7)
+sd22.soil = readxl::read_xlsx("soilsummary.xlsx", sheet = 8)
+
+
+x = sample_data(psField)
+x = as.data.frame(as.matrix(x))
+x <- x %>%
+  mutate(Block = ifelse(grepl("B",Plot), 
+    ifelse(nchar(Plot) == 5, substr(Plot, 1, 2),
+    ifelse(nchar(Plot) == 4, substr(Plot, 1, 1), Plot)),Block)) 
+
+
+for(i in 1:12) {
+# Soil properties
+x[x$Block == i & x$Location == "BZ" & x$Year == "2021" & !is.na(x$Block),"pH"] = bz.soil$`1:1 Soil pH`[i]
+x[x$Block == i & x$Location == "BZ" & x$Year == "2021" & !is.na(x$Block),"Nitrate"] = bz.soil$`Nitrate-N ppm N`[i]
+x[x$Block == i & x$Location == "BZ" & x$Year == "2021" & !is.na(x$Block),"OM"] = bz.soil$`Organic Matter LOI %`[i]
+x[x$Block == i & x$Location == "BZ" & x$Year == "2021" & !is.na(x$Block),"K"] = bz.soil$`Potassium ppm K`[i]
+
+x[x$Block == i & x$Location == "BZ" & x$Year == "2022" & !is.na(x$Block),"pH"] = bz22.soil$`1:1 Soil pH`[i]
+x[x$Block == i & x$Location == "BZ" & x$Year == "2022" & !is.na(x$Block),"Nitrate"] = bz22.soil$`Nitrate-N ppm N`[i]
+x[x$Block == i & x$Location == "BZ" & x$Year == "2022" & !is.na(x$Block),"OM"] = bz22.soil$`Organic Matter LOI %`[i]
+x[x$Block == i & x$Location == "BZ" & x$Year == "2022" & !is.na(x$Block),"K"] = bz22.soil$`Potassium ppm K`[i]
+
+x[x$Block == i & x$Location == "MO" & x$Year == "2021" & !is.na(x$Block),"pH"] = mo21.soil$`1:1 Soil pH`[i]
+x[x$Block == i & x$Location == "MO" & x$Year == "2021" & !is.na(x$Block),"Nitrate"] = mo21.soil$`Nitrate-N ppm N`[i]
+x[x$Block == i & x$Location == "MO" & x$Year == "2021" & !is.na(x$Block),"OM"] = mo21.soil$`Organic Matter LOI %`[i]
+x[x$Block == i & x$Location == "MO" & x$Year == "2021" & !is.na(x$Block),"K"] = mo21.soil$`Potassium ppm K`[i]
+
+
+x[x$Block == i & x$Location == "MO" & x$Year == "2022" & !is.na(x$Block),"pH"] = mo22.soil$`1:1 Soil pH`[i]
+x[x$Block == i & x$Location == "MO" & x$Year == "2022" & !is.na(x$Block),"Nitrate"] = mo22.soil$`Nitrate-N ppm N`[i]
+x[x$Block == i & x$Location == "MO" & x$Year == "2022" & !is.na(x$Block),"OM"] = mo22.soil$`Organic Matter LOI %`[i]
+x[x$Block == i & x$Location == "MO" & x$Year == "2022" & !is.na(x$Block),"K"] = mo22.soil$`Potassium ppm K`[i]
+
+x[x$Block == i & x$Location == "SD" & x$Year == "2021" & !is.na(x$Block),"pH"] = sd21.soil$pH[i]
+x[x$Block == i & x$Location == "SD" & x$Year == "2021" & !is.na(x$Block),"Nitrate"] = sd21.soil$`Nitrate-N`[i]
+x[x$Block == i & x$Location == "SD" & x$Year == "2021" & !is.na(x$Block),"OM"] = sd21.soil$OM[i]
+x[x$Block == i & x$Location == "SD" & x$Year == "2021" & !is.na(x$Block),"K"] = sd21.soil$K[i]
+
+
+x[x$Block == i & x$Location == "SD" & x$Year == "2022" & !is.na(x$Block),"pH"] = sd22.soil$pH[i]
+x[x$Block == i & x$Location == "SD" & x$Year == "2022" & !is.na(x$Block),"Nitrate"] = sd22.soil$`Nitrate-N`[i]
+x[x$Block == i & x$Location == "SD" & x$Year == "2022" & !is.na(x$Block),"OM"] = sd22.soil$OM[i]
+x[x$Block == i & x$Location == "SD" & x$Year == "2022" & !is.na(x$Block),"K"] = sd22.soil$K[i]
+
+#tillage
+x[x$Location == "BZ","tillage"] = "1"
+x[x$Location != "BZ","tillage"] = "0"
+x$tillage = as.factor(x$tillage)
+
+}
+
+#Precip
+x[x$Location == "BZ" & x$Year == "2021","Precip"] = 172
+x[x$Location == "BZ" & x$Year == "2022","Precip"] = 198
+x[x$Location == "MO" & x$Year == "2021","Precip"] = 171
+x[x$Location == "MO" & x$Year == "2022","Precip"] = 115
+x[x$Location == "SD" & x$Year == "2021","Precip"] = 204
+x[x$Location == "SD" & x$Year == "2022","Precip"] = 360
+
+x$texture = ifelse(x$Location == "BZ","SiltLoam", "ClayLoam")
+x$PrevCrop = ifelse(x$Location == "BZ", "fallow",ifelse(x$Location == "MO","mustard","soybean"))
+x$PrevCrop2yr = x$PrevCrop
+x[x$Location == "MO" & x$Year == "2021","PrevCrop2yr"] = "mustard21"
+x[x$Location == "MO" & x$Year == "2022","PrevCrop2yr"] = "mustard22"
+
+sample_data(psField) = x
+
+sample_data(psField)$locyr = paste(sample_data(psField)$Location,substr(sample_data(psField)$Year,3,4),sep="")
+
+saveRDS(psField,"Phyloseq2.0_Tempest/16S_maxEE_2_HI16S/ps.RDS")
+```
+
+
+
+
+# Step 4: Filtering
+1. Load phyloseq object
+2. Prevalence Filter -> Removes ASVs with only one instance across all location-years.
+3. Read Depth 10k filter -> creates phyloseq object only with samples having > 10,000 reads. 
+    *NAMED ps.filt.RDS*
+
+
+
+### Prevalence > 1 THEN sample threshold of 10,000 reads
+```{r Prevalence Filter THEN 10k read depth}
+# Load phyloseq object
+ps # 214551 taxa, 2083 samples
+
+
+# Prevalence Threshold of Greater than 1
+ps1 <- subset_taxa(ps, !is.na(Phylum) & !Phylum %in% c("", "uncharacterized")) # Remove uncharacterized reads (19,194 reads total)
+
+ps1 # 196175 taxa, 2083 samples
+
+prevdf = apply(X = otu_table(ps1),
+               MARGIN = ifelse(taxa_are_rows(ps1), yes = 1, no = 2),
+               FUN = function(x){sum(x > 0)})
+keepTaxa = names(prevdf)[(prevdf > 1)]
+ps.prev = prune_taxa(keepTaxa, ps1) 
+
+ps.prev # 69785 taxa, 2083 samples
+# Lost 126,390 taxa that only occurred once...
+
+
+
+# READ DEPTH 10k
+
+# Map read depth of all samples
+readDepth = as.data.frame(rowSums(otu_table(ps.prev)))
+readDepth$Location = as.factor(substr(row.names(readDepth),nchar(row.names(readDepth))-3,
+                                      nchar(row.names(readDepth))-2))
+readDepth$Year = as.factor(substr(row.names(readDepth),nchar(row.names(readDepth))-1,
+                                      nchar(row.names(readDepth))))
+colnames(readDepth)[1] = "Reads"
+
+# Remove lines with < 10,000 read depth
+lines10k = readDepth[readDepth$Reads >=10000,]
+lines10k = merge(lines10k, sample_data(ps.prev), by = "row.names")
+sample_data(ps.prev)$Row.names = row.names(sample_data(ps.prev))
+
+ps.lines10k = ps.prev %>%
+  subset_samples(Row.names %in% lines10k$Row.names)
+
+ps.lines10k # 69785 taxa, 2024 samples
+# phyloseq is dumb enough not to remove ASVs that no longer exist.
+
+# Remove ASVs that no longer exist
+dim(otu_table(ps.lines10k)[,colSums(otu_table(ps.lines10k))==0]) # 901 ASVs to remove
+taxa_sums(ps.lines10k)>0
+ps.filt = prune_taxa(taxa_sums(ps.lines10k)>0, ps.lines10k)
+
+ps.filt # 69782 taxa, 2024 samples
+
+# In total Removed:
+# 144,769 taxa
+# 59 samples
+
+#saveRDS(ps.filt,"Processing/Phyloseq2.0_Tempest/16S_maxEE_2_HI16S/ps.filt.RDS")
+
+```
+
+
+
+# Extra: Create merged Field Data - LOAD THIS CHUNK'S OUTPUT ABOVE
+```{r include=FALSE}
+
+# Load fieldData_Combined.RDS - output of this chunk.
+
+library(readxl)
+# Field Data 2022
+fieldData22 = read_excel("C:/Users/killi/OneDrive - Montana State University/Grad/Documents/Projects/2022_Field/BMB_RawFieldData.xlsx", sheet = 1)
+fieldData22 = fieldData22[fieldData22$Year == "2022",]
+fieldData22 = fieldData22[,c(1:21)]
+
+
+# Field data 2021
+fieldData21 = read_xlsx("C:/Users/killi/OneDrive - Montana State University/Grad/Documents/Projects/2021_Field/MB_2021_FieldData.xlsx", sheet = 1)
+fieldData.HI = read_xlsx("C:/Users/killi/OneDrive - Montana State University/Grad/Documents/Projects/Field_Combined/hawaii_fieldData.xlsx")
+fieldData21 = full_join(fieldData21,fieldData.HI)
+fieldData21 = fieldData21[,1:21]
+
+fieldData = as.data.frame(rbind(fieldData21,fieldData22))
+fieldData$locyr = paste(fieldData$Location,substr(fieldData$Year,3,4),sep = "")
+row.names(fieldData) = paste(fieldData$Plot,fieldData$locyr,sep = "_")
+
+
+# ALIGN WITH SEQTAB
+samples.out <- rownames(seqtab) # GOOD
+View(as.data.frame(samples.out))
+samdf <- data.frame(Subject=samples.out)
+
+fieldData$locyrPlot = paste(fieldData$Plot,fieldData$locyr,sep="_")
+fieldSampleData = merge(samdf, fieldData, by.x = "Subject", by.y = "locyrPlot", all.x = TRUE) #Merge field data with sample names to align with phyloseq object
+row.names(fieldSampleData) = fieldSampleData[,1]
+names(fieldSampleData)[1] = paste("Plot") 
+
+#populate bulk samples with year, location, plot, and block information
+fieldSampleData[endsWith(row.names(fieldSampleData),"22"),]$Year = "2022" 
+fieldSampleData[endsWith(row.names(fieldSampleData),"21"),]$Year = "2021" 
+
+fieldSampleData[grepl("BZ",row.names(fieldSampleData)),]$Location = "BZ"
+fieldSampleData[grepl("MO",row.names(fieldSampleData)),]$Location = "MO"
+fieldSampleData[grepl("SD",row.names(fieldSampleData)),]$Location = "SD"
+fieldSampleData[grepl("HI",row.names(fieldSampleData)),]$Location = "HI"
+
+fieldSampleData$Plot <- sub("_.*", "", rownames(fieldSampleData))  # extract part before "_"
+
+fieldSampleData[grepl("B_",row.names(fieldSampleData)),]$Block = substr(row.names(fieldSampleData[grepl("B_",row.names(fieldSampleData)),]),1,nchar(row.names(fieldSampleData[grepl("B_",row.names(fieldSampleData)),]))-8) 
+
+fieldSampleData[!grepl("B_",row.names(fieldSampleData)),]$Block = substr(row.names(fieldSampleData[!grepl("B_",row.names(fieldSampleData)),]),1,nchar(row.names(fieldSampleData[!grepl("B_",row.names(fieldSampleData)),]))-7)
+
+fieldSampleData[grepl("B_",row.names(fieldSampleData)),]$Line = "Bulk"
+
+#saveRDS(fieldSampleData, "C:/Users/killi/OneDrive - Montana State University/PostDoc/Microbiome_bacteria/fieldData_Combined.RDS")
+
+```
