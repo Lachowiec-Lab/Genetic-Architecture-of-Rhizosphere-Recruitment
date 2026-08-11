@@ -12,10 +12,9 @@ library(vegan)
 
 
 #########
-# BOZEMAN
+# BOZEMAN: sw MT
 #########
-setwd("~/Desktop/Phyloseq2.0/16S")
-miseq_path <- "/home/j22f487/Desktop/2022/Bozeman/KillianBozemanV6V8"
+miseq_path <- ""
 dir.exists(miseq_path)
 
 fnFs <- sort(list.files(miseq_path, pattern="_R1_001.fastq"))
@@ -62,10 +61,9 @@ saveRDS(seqtabAll,"BZ2022/seqtabAll_F.RDS")
 rm(list = ls())
 
 #########
-# CARC
+# CARC: cntrMT
 #########
-setwd("~/Desktop/Phyloseq2.0/16S")
-miseq_path <- "/home/j22f487/Desktop/2022/CARC/KillianCARCV6V8"
+miseq_path <- ""
 dir.exists(miseq_path)
 
 fnFs <- sort(list.files(miseq_path, pattern="_R1_001.fastq"))
@@ -114,8 +112,7 @@ rm(list = ls())
 #########
 # South Dakota
 #########
-setwd("~/Desktop/Phyloseq2.0/16S")
-miseq_path <- "/home/j22f487/Desktop/2022/SD/Ewing2022ALL"
+miseq_path <- ""
 dir.exists(miseq_path)
 
 fnFs <- sort(list.files(miseq_path, pattern="_R1_001.fastq"))
