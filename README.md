@@ -1,4 +1,5 @@
-# Uncovering genetic linkages in the rhizosphere contributing to adaptation
+# Code and datasets supporting "Conditional genetic architecture of bacterial and fungal rhizosphere recruitment for crop performance"
+
 
 ## Preparing phyloseq objects
 Microbial abundance based on 16S and ITS amplicon sequencing was processed to create phyloseq objects in the phyloseq folder.
