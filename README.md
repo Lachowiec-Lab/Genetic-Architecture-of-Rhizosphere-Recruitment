@@ -1,8 +1,8 @@
 # Code and datasets supporting "Conditional genetic architecture of bacterial and fungal rhizosphere recruitment for crop performance"
-
+We work through raw sequence read processing, community analysis, preparing and modeling microbial taxa as plant traits, genome wide association study (GWAS), and relating microbial associated plant genetic loci to agronomic traits.
 
 ## Preparing phyloseq objects
-Microbial abundance based on 16S and ITS amplicon sequencing was processed to create phyloseq objects in the phyloseq folder.
+Bacterial and fungal abundance based on 16S and ITS amplicon sequencing was processed to create phyloseq objects in the ~/phyloseq/ folder.
 
 ### 16S
 For 16S data, in the ~/phyloseq/16S folder
@@ -10,16 +10,21 @@ For 16S data, in the ~/phyloseq/16S folder
 
 2. merging.R combines the seqtabAll_F files into a single seqtab called seqtab.merged. Chimeras are removed from this file, and then taxonomic assignment is completed using the silva nr99 v138.1 with species database to create the file taxTab. 
 
-3. Processing.Rmd combines seqtab.merged.NoC.RDS and taxTab.RDS into a phyloseq object. It also uses the FieldData to tie into all the plot information.
+3. Processing.Rmd combines seqtab.merged.NoC.RDS and taxTab.RDS into a phyloseq object. It also uses the ~/phyloseq/agData/fieldData_Combined.RDS to tie into all the plot information.
 	a. ps.RDS is complete at this point and saved. 
-	
 	b. Three-step filtering to create ps.filt.RDS:
 		1. Remove reads that are not classified to Phylum.
 		2. Prevalence threshold of 2 is used to remove single-instance ASVs
 		3. Remove samples with fewer than 10,000 reads.
 
 ### ITS
-For ITS data, in the ~phyloseq/ITS folder
+For ITS data, in the ~phyloseq/ITS folder/
+1. FilterandTrim_Q20_Len200.R
+   a. Truncates reads and filters for quality with dada2 to create seqtabAll_F.RDS for each location-year.
+   b. seqtabAll_F files combined into a single seqtab 
+   c. Chimeras were removed from this to create a file called seqtab.merged.noC.RDS/ Then taxonomic assignment was completed using the silva nr99 v138.1 with species database to create the file taxTab.RDS.
+2. ITS_Processing_mod.Rmd created a phyloseq object named ps.q20.trunc200.RDS from the files seqtab.merged.noC.RDS, taxTab.RDS, and the ~/phyloseq/agData/fieldData_Combined.RDS to tie into all the plot information.
+
 
 ## Preparing data for analysis
 Scripts for processing phyloseq objects for GWAS analyses are found in the ~/PrepForAnalysis/ folder.
