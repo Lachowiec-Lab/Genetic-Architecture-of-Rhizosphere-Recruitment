@@ -1,14 +1,29 @@
 # Uncovering genetic linkages in the rhizosphere contributing to adaptation
 
+## Preparing phyloseq objects
+Microbial abundance based on 16S and ITS amplicon sequencing was processed to create phyloseq objects in the phyloseq folder.
 
-### Filter and cleaning reads
-Each site-year was cleaned individually as shown in 20XX_filtering. 
+### 16S
+For 16S data, in the ~phyloseq/16S folder
+1. 2021.R and 2022.R clean the raw reads with dada2 to create seqtabAll_F files for each location-year.
 
-### Merging into phyloseq object and analysis
-The reads from each site-year were compiled into phyloseq objects which were then subsequentely compiled into one phyloseq object encompassing all site-years.
-The combined phyloseq object was used in MicrobesSeqAnalysis.Rmd for analysis.  
+2. merging.R combines the seqtabAll_F files into a single seqtab called seqtab.merged. Chimeras are removed from this file, and then taxonomic assignment is completed using the silva database file included to create the file taxTab. 
+
+3. Processing.Rmd combines seqtab.merged.NoC.RDS and taxTab.RDS into a phyloseq object. It also uses the FieldData to tie into all the plot information.
+	a. ps.RDS is complete at this point and saved. 
+	
+	b. Three-step filtering to create ps.filt.RDS:
+		1. Remove reads that are not classified to Phylum.
+		2. Prevalence threshold of 2 is used to remove single-instance ASVs
+		3. Remove samples with fewer than 10,000 reads.
+
+### ITS
+For ITS data, in the ~phyloseq/ITS folder
+
+
 
 ### Citations
-This work supports the manuscript currently under review for Nature Plants: Uncovering Genetic Linkages in the Rhizosphere and Contributing to Adaptation.  
+This work supports the manuscript currently under review at Theoretical and Applied Genetics.
 
-Raw 16S reads are available from ___
+Raw 16S and ITS reads as fastq files are available in the NCBI Sequence Read Archive database under BioProject PRJNA909304, https://www.ncbi.nlm.nih.gov/bioproject/PRJNA909304.
+
