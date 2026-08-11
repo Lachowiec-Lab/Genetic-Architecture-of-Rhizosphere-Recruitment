@@ -20,9 +20,13 @@ For 16S data, in the ~phyloseq/16S folder
 ### ITS
 For ITS data, in the ~phyloseq/ITS folder
 
+## Preparing data for GWAS
+Scripts for processing phyloseq objects for GWAS analyses are found in the ~/prepForGWAS/ folder
 
+## Analyses
+Scripts for examining microbial abundances, heritability calculations, GWAS, Wilcoxon tests are found in the ~/analyses/ folder
 
-### Citations
+## Citations
 This work supports the manuscript currently under review at Theoretical and Applied Genetics.
 
 Raw 16S and ITS reads as fastq files are available in the NCBI Sequence Read Archive database under BioProject PRJNA909304, https://www.ncbi.nlm.nih.gov/bioproject/PRJNA909304.
