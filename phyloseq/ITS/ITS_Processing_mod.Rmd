@@ -7,7 +7,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-Tempest code FilterandTrim.R created seqtabs for each location-year, merged them, then removed chimeras and assigned taxonomy.
+Tempest code FilterandTrim_Q20_Len200.R created seqtabs for each location-year, merged them, then removed chimeras and assigned taxonomy.
 
 
 ```{r phyloseq object Quality > 20 and Trunc to 200bp}
@@ -21,7 +21,7 @@ fieldData = readRDS("~/phyloseq/agData/fieldData_Combined.RDS")
 
 
 # Merge Phyloseq
-ps.its = phyloseq(otu_table(seqtab,taxa_are_rows = F),tax_table(taxtab),sample_data(fieldData))
+ps.its = phyloseq(otu_table(seqtab, taxa_are_rows = F), tax_table(taxtab), sample_data(fieldData))
 
 # Add ASV short names
 dna <- Biostrings::DNAStringSet(taxa_names(ps.its))
