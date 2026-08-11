@@ -9,10 +9,9 @@ library(vegan)
 
 
 #########
-# BOZEMAN
+# BOZEMAN  swMT
 #########
-setwd("~/Desktop/Phyloseq2.0/16S")
-miseq_path <- "/home/j22f487/Desktop/2021/BZ2021/BZ_16S"
+miseq_path <- ""
 dir.exists(miseq_path)
 
 fnFs <- sort(list.files(miseq_path, pattern="_R1_001.fastq"))
@@ -59,10 +58,9 @@ saveRDS(seqtabAll,"BZ2021/seqtabAll_F.RDS")
 rm(list = ls())
 
 #########
-# CARC
+# CARC: cntrMT
 #########
-setwd("~/Desktop/Phyloseq2.0/16S")
-miseq_path <- "/home/j22f487/Desktop/2021/CARC2021/CARC_16S"
+miseq_path <- ""
 dir.exists(miseq_path)
 
 fnFs <- sort(list.files(miseq_path, pattern="_R1_001.fastq"))
@@ -111,8 +109,7 @@ rm(list = ls())
 #########
 # South Dakota
 #########
-setwd("~/Desktop/Phyloseq2.0/16S")
-miseq_path <- "/home/j22f487/Desktop/2021/SD2021/16S/2021"
+miseq_path <- ""
 dir.exists(miseq_path)
 
 fnFs <- sort(list.files(miseq_path, pattern="_R1_001.fastq"))
@@ -161,8 +158,7 @@ rm(list = ls())
 #########
 # Hawaii
 #########
-setwd("~/Desktop/Phyloseq2.0/16S/all_maxEE_2")
-miseq_path <- "/home/j22f487/Desktop/2021/HI2021_V2025/HI_16S"
+miseq_path <- ""
 dir.exists(miseq_path)
 
 fnFs <- sort(list.files(miseq_path, pattern="_R1_001.fastq"))
