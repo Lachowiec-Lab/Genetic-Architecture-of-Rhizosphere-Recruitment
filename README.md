@@ -7,7 +7,7 @@ Microbial abundance based on 16S and ITS amplicon sequencing was processed to cr
 For 16S data, in the ~phyloseq/16S folder
 1. 2021.R and 2022.R clean the raw reads with dada2 to create seqtabAll_F files for each location-year.
 
-2. merging.R combines the seqtabAll_F files into a single seqtab called seqtab.merged. Chimeras are removed from this file, and then taxonomic assignment is completed using the silva database file included to create the file taxTab. 
+2. merging.R combines the seqtabAll_F files into a single seqtab called seqtab.merged. Chimeras are removed from this file, and then taxonomic assignment is completed using the silva nr99 v138.1 with species database to create the file taxTab. 
 
 3. Processing.Rmd combines seqtab.merged.NoC.RDS and taxTab.RDS into a phyloseq object. It also uses the FieldData to tie into all the plot information.
 	a. ps.RDS is complete at this point and saved. 
