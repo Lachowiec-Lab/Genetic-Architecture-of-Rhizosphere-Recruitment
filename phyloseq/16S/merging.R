@@ -1,7 +1,6 @@
 library(dada2)
 library(phyloseq)
 
-setwd("~/Desktop/Phyloseq2.0/16S/all_maxEE_2")
 
 bz21 <- readRDS("BZ2021/seqtabAll_F.RDS")
 bz22 <- readRDS("BZ2022/seqtabAll_F.RDS")
