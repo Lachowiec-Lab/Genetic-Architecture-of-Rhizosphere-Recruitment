@@ -37,7 +37,7 @@ Scripts for examining microbial abundances, GWAS, Wilcoxon tests are found in th
 The Wilcoxons code is for testing differences in agronomic traits between allelic groups at microbe trait associated SNPs.
 
 ## Citations
-This work supports the manuscript currently under review at Theoretical and Applied Genetics.
+This work supports the manuscript currently under review at Theoretical and Applied Genetics, and posted on bioRxiv, https://www.biorxiv.org/content/10.1101/2024.11.21.624704v1.abstract
 
 Raw 16S and ITS reads as fastq files are available in the NCBI Sequence Read Archive database under BioProject PRJNA909304, https://www.ncbi.nlm.nih.gov/bioproject/PRJNA909304.
 
