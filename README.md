@@ -1,4 +1,4 @@
-# Code and datasets supporting "Conditional genetic architecture of bacterial and fungal rhizosphere recruitment for crop performance"
+# Code and datasets supporting the manuscript, “Barley genetic architecture conditionally impacts recruitment of rhizosphere microorganisms and crop performance”
 We work through raw sequence read processing, community analysis, preparing and modeling microbial taxa as plant traits, genome wide association study (GWAS), and relating microbial associated plant genetic loci to agronomic traits.
 
 ## Preparing phyloseq objects
